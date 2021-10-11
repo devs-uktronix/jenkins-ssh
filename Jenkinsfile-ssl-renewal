@@ -2,11 +2,12 @@ pipeline {
     agent any
 
     stages {
-        stage('Copy ssl certificates from bastion.core') {
+        stage('Make temp workind dir') {
             steps {
-                sshagent(['private-key']) {
-                    sh bash_scripts/sync_certs.sh
-                }
+                sh (script: """
+                mkdir -p /tmp/temp_ssl_backup_`date +%Y-%m-%d`
+
+                """)
             }
             post {
                 success {
@@ -17,6 +18,21 @@ pipeline {
                 }
             }  
         }
+        // stage('Copy ssl certificates from bastion.core') {
+        //     steps {
+        //         sshagent(['private-key']) {
+        //             sh bash_scripts/sync_certs.sh
+        //         }
+        //     }
+        //     post {
+        //         success {
+        //             echo "ssl certifactes have been synched successfully 😀"
+        //         }
+        //         failure {
+        //             echo "Could not sync ssl certifactes 😟 "
+        //         }
+        //     }  
+        // }
         // stage('Encypt private ssl certificates') {
         //     steps {
         //         sh (script: """
