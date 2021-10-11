@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Make temp workind dir') {
+        stage('Make a temp dir and sync certs') {
             steps{
                 sshagent(['private-key']) {
                     sh (script: """
@@ -40,25 +40,28 @@ pipeline {
             }         
         }
 
-        // stage('Clone main repo and upload new encrypted certs') {
-        //     steps {
-        //         sh (script: """
+        stage('Make a new repo branch and upload new encrypted certs') {
+            steps {
+                sh (script: """
+                    git checkout -b ssl_certs_encrypt_`date +%F`
+                    rsync -Paz /tmp/temp_ssl_backup_`date +%F`/test_certs_import/ files/ssl_certs/
+                    git status
+                    git add .
+                    git status
+                    """
+                )
+            }
+            post {
+                success {
+                    echo "ssl certifactes have been pushed to the repoitory successfully 😀"
+                }
+                failure {
+                    echo "Could not pushed to repo ssl certifactes to the repoitory 😟 "
+                }
+            }         
+        }
 
-        //             rsync -Paz ../temp_ssl_backup_`date +%F`/test_certs_import/ jupix-ansible/files/ssl_certs/
-        //             git status
-        //             git add .
-        //             """
-        //         )
-        //     }
-        //     post {
-        //         success {
-        //             echo "ssl certifactes have been pushed to the repoitory successfully 😀"
-        //         }
-        //         failure {
-        //             echo "Could not pushed to repo ssl certifactes to the repoitory 😟 "
-        //         }
-        //     }         
-        // }
+
         // stage('Clean up') {
         //     steps {
         //         sh (script: """
