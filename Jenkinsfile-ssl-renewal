@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Copy ssl certificates from bastion.core') {
+            steps {
+                sh (script: """
+                    sh bash_scripts/sync_certs.sh
+                    """
+                )
+            }
+            post {
+                success {
+                    echo "ssl certifactes have been synched successfully 😀"
+                }
+                failure {
+                    echo "Could not sync ssl certifactes 😟 "
+                }
+            }  
+        }
+        stage('Encypt private ssl certificates') {
+            steps {
+                sh (script: """
+                    ansible-vault encrypt --vault-password-file ~/.vault_password temp_ssl_backup_`date +%F`/test_certs_import/*/privkey.pem
+                    """
+                )
+            }
+            post {
+                success {
+                    echo "ssl certifactes have been ansible-encrypted successfully 😀"
+                }
+                failure {
+                    echo "Could not ansible-encrypt ssl certifactes 😟 "
+                }
+            }         
+        }
+
+        stage('Clone main repo and upload new encrypted certs') {
+            steps {
+                sh (script: """
+
+                    rsync -Paz ../temp_ssl_backup_`date +%F`/test_certs_import/ jupix-ansible/files/ssl_certs/
+                    git status
+                    git add .
+                    """
+                )
+            }
+            post {
+                success {
+                    echo "ssl certifactes have been pushed to the repoitory successfully 😀"
+                }
+                failure {
+                    echo "Could not pushed to repo ssl certifactes to the repoitory 😟 "
+                }
+            }         
+        }
+        stage('Clean up') {
+            steps {
+                sh (script: """
+                    # remove the temp working dir
+                    # rm -rf /tmp/temp_ssl_backup_`date +%F`
+                    """
+                )
+            }
+            post {
+                success {
+                    echo "removed working dir from /tmp 😀"
+                }
+                failure {
+                    echo "Could not remove working dir from /tmp 😟 "
+                }
+            }         
+        }
+    }
+}
