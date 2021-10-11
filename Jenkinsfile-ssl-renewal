@@ -44,7 +44,7 @@ pipeline {
             steps {
                 sh (script: """
                     git checkout -b ssl_certs_encrypt_`date +%F`
-                    rsync -Paz /tmp/temp_ssl_backup_`date +%F`/test_certs_import/ files/ssl_certs/
+                    rsync -Paz /tmp/temp_ssl_backup_`date +%F`/ files/ssl_certs/
                     git status
                     git add .
                     git status
