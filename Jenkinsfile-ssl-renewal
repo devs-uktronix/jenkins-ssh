@@ -6,7 +6,7 @@ pipeline {
             steps {
                 sshagent(['private-key']) {
                     sh bash_scripts/sync_certs.sh
-                )
+                }
             }
             post {
                 success {
