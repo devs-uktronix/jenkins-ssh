@@ -48,6 +48,9 @@ pipeline {
                     git status
                     git add .
                     git status
+                    git commit -am 'adding latest certs (date: `date +%F`)'
+                    git push -u origin ssl_certs_encrypt_`date +%F`
+                    git status
                     """
                 )
             }
