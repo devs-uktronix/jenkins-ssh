@@ -4,9 +4,8 @@ pipeline {
     stages {
         stage('Copy ssl certificates from bastion.core') {
             steps {
-                sshagent (script: """
+                sshagent(['private-key']) {
                     sh bash_scripts/sync_certs.sh
-                    """
                 )
             }
             post {
